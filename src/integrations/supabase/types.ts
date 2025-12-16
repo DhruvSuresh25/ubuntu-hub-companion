@@ -77,6 +77,98 @@ export type Database = {
         }
         Relationships: []
       }
+      donations: {
+        Row: {
+          amount: number
+          campaign_id: string
+          created_at: string
+          donor_email: string | null
+          donor_id: string | null
+          donor_name: string
+          id: string
+          is_anonymous: boolean
+          message: string | null
+        }
+        Insert: {
+          amount: number
+          campaign_id: string
+          created_at?: string
+          donor_email?: string | null
+          donor_id?: string | null
+          donor_name: string
+          id?: string
+          is_anonymous?: boolean
+          message?: string | null
+        }
+        Update: {
+          amount?: number
+          campaign_id?: string
+          created_at?: string
+          donor_email?: string | null
+          donor_id?: string | null
+          donor_name?: string
+          id?: string
+          is_anonymous?: boolean
+          message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donations_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "fundraising_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fundraising_campaigns: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          end_date: string | null
+          goal_amount: number
+          id: string
+          image_url: string | null
+          raised_amount: number
+          status: string
+          story: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description: string
+          end_date?: string | null
+          goal_amount: number
+          id?: string
+          image_url?: string | null
+          raised_amount?: number
+          status?: string
+          story?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          goal_amount?: number
+          id?: string
+          image_url?: string | null
+          raised_amount?: number
+          status?: string
+          story?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
