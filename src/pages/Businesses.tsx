@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Star, MapPin, Phone, Search, Filter, BadgeCheck } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState, useMemo } from "react";
 import { mockBusinesses } from "@/data/mockData";
 import { Header } from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,17 @@ import { Button } from "@/components/ui/button";
 const categories = ["All", "Marketing", "Services", "Education", "Tech", "Food"];
 
 export default function Businesses() {
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredBusinesses = useMemo(() => {
+    return mockBusinesses.filter((business) => {
+      const matchesCategory = selectedCategory === "All" || business.category === selectedCategory;
+      const matchesSearch = business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        business.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [selectedCategory, searchQuery]);
   return (
     <div className="app-container content-area">
       <Header title="Businesses" showNotification />
@@ -25,6 +37,8 @@ export default function Businesses() {
             <Input 
               placeholder="Search businesses..." 
               className="pl-10 bg-card border-border rounded-xl"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <Button variant="outline" size="icon" className="rounded-xl border-border">
@@ -39,11 +53,12 @@ export default function Businesses() {
           transition={{ delay: 0.1 }}
           className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide"
         >
-          {categories.map((cat, index) => (
+          {categories.map((cat) => (
             <button
               key={cat}
+              onClick={() => setSelectedCategory(cat)}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                index === 0 
+                selectedCategory === cat 
                   ? "gradient-primary text-primary-foreground" 
                   : "bg-card text-foreground border border-border hover:border-primary"
               }`}
@@ -60,7 +75,7 @@ export default function Businesses() {
           transition={{ delay: 0.2 }}
           className="space-y-4"
         >
-          {mockBusinesses.map((business, index) => (
+          {filteredBusinesses.map((business, index) => (
             <motion.div
               key={business.id}
               initial={{ opacity: 0, y: 20 }}
