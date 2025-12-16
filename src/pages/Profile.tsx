@@ -1,18 +1,172 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { mockUser, mockBusinessCards, mockOrganizations } from "@/data/mockData";
 import { Header } from "@/components/layout/Header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { 
-  Edit, Mail, Phone, MapPin, Briefcase, Building2, 
-  CreditCard, ChevronRight, Settings 
+  Edit, Mail, Phone, Building2, 
+  CreditCard, ChevronRight, Settings, Camera, Loader2
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { useToast } from "@/hooks/use-toast";
+import { useState, useRef, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { mockOrganizations } from "@/data/mockData";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { profile, loading, updateProfile, refetch } = useProfile();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    full_name: '',
+    phone: '',
+  });
+  const [businessCardCount, setBusinessCardCount] = useState(0);
+  
   const joinedOrgs = mockOrganizations.filter(org => org.isJoined);
+
+  useEffect(() => {
+    if (profile) {
+      setEditForm({
+        full_name: profile.full_name || '',
+        phone: profile.phone || '',
+      });
+    }
+  }, [profile]);
+
+  useEffect(() => {
+    if (user) {
+      fetchBusinessCardCount();
+    }
+  }, [user]);
+
+  const fetchBusinessCardCount = async () => {
+    if (!user) return;
+    const { count } = await supabase
+      .from('business_cards')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+    setBusinessCardCount(count || 0);
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image under 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const { error: updateError } = await updateProfile({ avatar_url: publicUrl });
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Avatar updated",
+        description: "Your profile picture has been updated",
+      });
+      refetch();
+    } catch (error: any) {
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload avatar",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    const { error } = await updateProfile(editForm);
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully",
+      });
+      setEditDialogOpen(false);
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="app-container content-area">
+        <Header title="Profile" showBack />
+        <div className="px-4 max-w-md mx-auto flex flex-col items-center justify-center py-20">
+          <p className="text-muted-foreground mb-4">Please sign in to view your profile</p>
+          <Button onClick={() => navigate("/auth")}>Sign In</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="app-container content-area">
+        <Header title="Profile" showBack />
+        <div className="px-4 max-w-md mx-auto flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  const displayName = profile?.full_name || user.email?.split('@')[0] || 'User';
+  const initials = displayName.charAt(0).toUpperCase();
 
   return (
     <div className="app-container content-area">
@@ -27,18 +181,39 @@ export default function Profile() {
         >
           <div className="relative inline-block">
             <Avatar className="w-24 h-24 border-4 border-primary/20 mx-auto">
-              <AvatarImage src={mockUser.avatar} />
-              <AvatarFallback className="text-2xl">{mockUser.name[0]}</AvatarFallback>
+              <AvatarImage src={profile?.avatar_url || undefined} />
+              <AvatarFallback className="text-2xl bg-primary/10 text-primary">{initials}</AvatarFallback>
             </Avatar>
-            <button className="absolute bottom-0 right-0 w-8 h-8 gradient-primary rounded-full flex items-center justify-center shadow-glow">
-              <Edit className="w-4 h-4 text-primary-foreground" />
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+            />
+            <button 
+              onClick={handleAvatarClick}
+              disabled={uploading}
+              className="absolute bottom-0 right-0 w-8 h-8 gradient-primary rounded-full flex items-center justify-center shadow-glow disabled:opacity-50"
+            >
+              {uploading ? (
+                <Loader2 className="w-4 h-4 text-primary-foreground animate-spin" />
+              ) : (
+                <Camera className="w-4 h-4 text-primary-foreground" />
+              )}
             </button>
           </div>
-          <h2 className="font-bold text-xl text-foreground mt-4">{mockUser.name}</h2>
-          <p className="text-primary text-sm font-medium">{mockUser.profession}</p>
-          {mockUser.bio && (
-            <p className="text-muted-foreground text-sm mt-2 max-w-xs mx-auto">{mockUser.bio}</p>
-          )}
+          <h2 className="font-bold text-xl text-foreground mt-4">{displayName}</h2>
+          <p className="text-primary text-sm font-medium">{user.email}</p>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mt-2"
+            onClick={() => setEditDialogOpen(true)}
+          >
+            <Edit className="w-3 h-3 mr-1" />
+            Edit Profile
+          </Button>
         </motion.div>
 
         {/* Contact Info */}
@@ -55,17 +230,17 @@ export default function Profile() {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Email</p>
-                <p className="text-sm font-medium text-foreground">{mockUser.email}</p>
+                <p className="text-sm font-medium text-foreground">{user.email}</p>
               </div>
             </div>
-            {mockUser.phone && (
+            {profile?.phone && (
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-card-green flex items-center justify-center">
                   <Phone className="w-5 h-5 text-emerald-500" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Phone</p>
-                  <p className="text-sm font-medium text-foreground">{mockUser.phone}</p>
+                  <p className="text-sm font-medium text-foreground">{profile.phone}</p>
                 </div>
               </div>
             )}
@@ -99,7 +274,7 @@ export default function Profile() {
                 </div>
                 <div>
                   <p className="font-medium text-foreground">My Cards</p>
-                  <p className="text-sm text-muted-foreground">{mockBusinessCards.length} cards created</p>
+                  <p className="text-sm text-muted-foreground">{businessCardCount} cards created</p>
                 </div>
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -124,7 +299,7 @@ export default function Profile() {
             </Link>
           </div>
           <div className="bg-card rounded-2xl overflow-hidden shadow-soft">
-            {joinedOrgs.map((org, index) => (
+            {joinedOrgs.length > 0 ? joinedOrgs.map((org, index) => (
               <Link
                 key={org.id}
                 to={`/organizations/${org.id}`}
@@ -141,7 +316,9 @@ export default function Profile() {
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </Link>
-            ))}
+            )) : (
+              <p className="text-sm text-muted-foreground p-4 text-center">No organizations joined yet</p>
+            )}
           </div>
         </motion.div>
 
@@ -161,6 +338,40 @@ export default function Profile() {
           </Button>
         </motion.div>
       </div>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="edit-name">Full Name</Label>
+              <Input
+                id="edit-name"
+                value={editForm.full_name}
+                onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+                placeholder="Enter your name"
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-phone">Phone Number</Label>
+              <Input
+                id="edit-phone"
+                value={editForm.phone}
+                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                placeholder="Enter your phone number"
+                className="mt-1.5"
+              />
+            </div>
+            <Button onClick={handleSaveProfile} className="w-full">
+              Save Changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
