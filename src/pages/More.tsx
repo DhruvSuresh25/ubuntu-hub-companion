@@ -4,9 +4,10 @@ import {
   Megaphone, Vote, Settings, HelpCircle, LogOut,
   ChevronRight, User
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
-import { mockUser } from "@/data/mockData";
+import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const menuSections = [
@@ -14,7 +15,7 @@ const menuSections = [
     title: "Services",
     items: [
       { icon: CreditCard, label: "Business Cards", path: "/business-cards", badge: "2" },
-      { icon: Heart, label: "Donations", path: "/donations" },
+      { icon: Heart, label: "Fundraise", path: "/fundraise" },
       { icon: Users, label: "Volunteers", path: "/volunteers" },
       { icon: Megaphone, label: "Announcements", path: "/announcements" },
     ]
@@ -37,6 +38,15 @@ const menuSections = [
 ];
 
 export default function More() {
+  const { profile } = useProfile();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/auth");
+  };
+
   return (
     <div className="app-container content-area">
       <Header title="More" />
@@ -53,13 +63,13 @@ export default function More() {
             className="flex items-center gap-4 bg-card rounded-2xl p-4 shadow-soft card-hover"
           >
             <Avatar className="w-16 h-16 border-2 border-primary/20">
-              <AvatarImage src={mockUser.avatar} />
-              <AvatarFallback>{mockUser.name[0]}</AvatarFallback>
+              <AvatarImage src={profile?.avatar_url || undefined} />
+              <AvatarFallback>{profile?.full_name?.[0] || user?.email?.[0] || "U"}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground">{mockUser.name}</h3>
-              <p className="text-muted-foreground text-sm">{mockUser.email}</p>
-              <p className="text-primary text-xs mt-1">{mockUser.profession}</p>
+              <h3 className="font-semibold text-foreground">{profile?.full_name || "User"}</h3>
+              <p className="text-muted-foreground text-sm">{user?.email || ""}</p>
+              <p className="text-primary text-xs mt-1">{profile?.phone || "Add phone number"}</p>
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
           </Link>
@@ -108,7 +118,10 @@ export default function More() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <button className="w-full flex items-center justify-center gap-2 py-3 text-destructive font-medium hover:bg-destructive/10 rounded-xl transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 py-3 text-destructive font-medium hover:bg-destructive/10 rounded-xl transition-colors"
+          >
             <LogOut className="w-5 h-5" />
             <span>Log Out</span>
           </button>

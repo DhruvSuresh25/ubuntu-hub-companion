@@ -26,6 +26,9 @@ import Announcements from "./pages/Announcements";
 import Settings from "./pages/Settings";
 import Help from "./pages/Help";
 import NotFound from "./pages/NotFound";
+import Fundraise from "./pages/Fundraise";
+import CampaignDetails from "./pages/CampaignDetails";
+import CreateCampaign from "./pages/CreateCampaign";
 
 const queryClient = new QueryClient();
 
@@ -56,8 +59,10 @@ function AppLayout() {
         <Route path="/announcements" element={<Announcements />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/help" element={<Help />} />
+        <Route path="/fundraise" element={<Fundraise />} />
+        <Route path="/fundraise/create" element={<CreateCampaign />} />
+        <Route path="/fundraise/:id" element={<CampaignDetails />} />
         {/* Placeholder routes */}
-        <Route path="/donations" element={<More />} />
         <Route path="/documents" element={<More />} />
         <Route path="/gallery" element={<More />} />
         <Route path="/polls" element={<More />} />
