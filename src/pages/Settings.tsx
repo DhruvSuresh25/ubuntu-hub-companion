@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import {
   Dialog,
   DialogContent,
@@ -30,10 +31,10 @@ export default function Settings() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [toggles, setToggles] = useState({
     notifications: true,
     emailNotifications: false,
-    darkMode: false,
   });
 
   // Dialog states
@@ -54,6 +55,15 @@ export default function Settings() {
   });
 
   const handleToggle = (key: string) => {
+    if (key === "darkMode") {
+      toggleTheme();
+      toast({
+        title: "Theme Updated",
+        description: `Dark mode has been ${theme === 'light' ? 'enabled' : 'disabled'}`,
+      });
+      return;
+    }
+    
     setToggles(prev => ({
       ...prev,
       [key]: !prev[key as keyof typeof prev]
@@ -242,7 +252,7 @@ export default function Settings() {
                   
                   {item.type === "toggle" ? (
                     <Switch
-                      checked={toggles[item.key as keyof typeof toggles]}
+                      checked={item.key === "darkMode" ? theme === 'dark' : toggles[item.key as keyof typeof toggles]}
                       onCheckedChange={() => handleToggle(item.key!)}
                     />
                   ) : (
