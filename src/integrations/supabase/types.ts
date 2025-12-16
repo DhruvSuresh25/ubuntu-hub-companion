@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_cards: {
+        Row: {
+          accent_color: string
+          bio: string | null
+          company: string
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          instagram: string | null
+          linkedin: string | null
+          phone: string | null
+          primary_color: string
+          profession: string
+          secondary_color: string
+          template: string
+          twitter: string | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          accent_color?: string
+          bio?: string | null
+          company: string
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          instagram?: string | null
+          linkedin?: string | null
+          phone?: string | null
+          primary_color?: string
+          profession: string
+          secondary_color?: string
+          template?: string
+          twitter?: string | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          accent_color?: string
+          bio?: string | null
+          company?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          instagram?: string | null
+          linkedin?: string | null
+          phone?: string | null
+          primary_color?: string
+          profession?: string
+          secondary_color?: string
+          template?: string
+          twitter?: string | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
