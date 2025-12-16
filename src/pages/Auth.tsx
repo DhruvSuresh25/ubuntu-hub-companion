@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, User, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, ArrowLeft, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,7 @@ export default function Auth() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
@@ -45,6 +46,10 @@ export default function Auth() {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Please enter a valid email";
+    }
+
+    if (mode === "signup" && formData.phone && !/^[+]?[\d\s-]{10,}$/.test(formData.phone)) {
+      newErrors.phone = "Please enter a valid phone number";
     }
 
     if (!formData.password) {
@@ -87,7 +92,7 @@ export default function Auth() {
           navigate("/");
         }
       } else {
-        const { error } = await signUp(formData.email, formData.password, formData.name);
+        const { error } = await signUp(formData.email, formData.password, formData.name, formData.phone);
         if (error) {
           if (error.message.includes("already registered")) {
             toast({
@@ -124,7 +129,7 @@ export default function Auth() {
   const toggleMode = () => {
     setMode(mode === "login" ? "signup" : "login");
     setErrors({});
-    setFormData({ name: "", email: "", password: "", confirmPassword: "" });
+    setFormData({ name: "", email: "", phone: "", password: "", confirmPassword: "" });
   };
 
   return (
@@ -195,6 +200,24 @@ export default function Auth() {
             </div>
             {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
           </div>
+
+          {mode === "signup" && (
+            <div className="mb-4">
+              <Label htmlFor="phone">Phone Number <span className="text-muted-foreground">(optional)</span></Label>
+              <div className="relative mt-1.5">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+1 234 567 8900"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="pl-11"
+                />
+              </div>
+              {errors.phone && <p className="text-destructive text-xs mt-1">{errors.phone}</p>}
+            </div>
+          )}
 
           <div className="mb-4">
             <Label htmlFor="password">Password</Label>
