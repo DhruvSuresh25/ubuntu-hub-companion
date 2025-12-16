@@ -29,6 +29,10 @@ import NotFound from "./pages/NotFound";
 import Fundraise from "./pages/Fundraise";
 import CampaignDetails from "./pages/CampaignDetails";
 import CreateCampaign from "./pages/CreateCampaign";
+import Polls from "./pages/Polls";
+import MemberDirectory from "./pages/MemberDirectory";
+import FacilityBooking from "./pages/FacilityBooking";
+import CreateEvent from "./pages/CreateEvent";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +49,7 @@ function AppLayout() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/" element={<Home />} />
         <Route path="/events" element={<Events />} />
+        <Route path="/events/create" element={<CreateEvent />} />
         <Route path="/events/:id" element={<EventDetails />} />
         <Route path="/organizations" element={<Organizations />} />
         <Route path="/organizations/:id" element={<OrganizationDetails />} />
@@ -62,10 +67,12 @@ function AppLayout() {
         <Route path="/fundraise" element={<Fundraise />} />
         <Route path="/fundraise/create" element={<CreateCampaign />} />
         <Route path="/fundraise/:id" element={<CampaignDetails />} />
+        <Route path="/polls" element={<Polls />} />
+        <Route path="/members" element={<MemberDirectory />} />
+        <Route path="/facilities" element={<FacilityBooking />} />
         {/* Placeholder routes */}
         <Route path="/documents" element={<More />} />
         <Route path="/gallery" element={<More />} />
-        <Route path="/polls" element={<More />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {showNav && <BottomNav />}

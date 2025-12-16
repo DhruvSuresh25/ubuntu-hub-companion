@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          image_url: string | null
+          is_pinned: boolean
+          priority: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_pinned?: boolean
+          priority?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_pinned?: boolean
+          priority?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       business_cards: {
         Row: {
           accent_color: string
@@ -121,6 +163,225 @@ export type Database = {
           },
         ]
       }
+      event_registrations: {
+        Row: {
+          checked_in_at: string | null
+          created_at: string
+          event_id: string
+          id: string
+          status: string
+          ticket_code: string | null
+          user_id: string
+        }
+        Insert: {
+          checked_in_at?: string | null
+          created_at?: string
+          event_id: string
+          id?: string
+          status?: string
+          ticket_code?: string | null
+          user_id: string
+        }
+        Update: {
+          checked_in_at?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          status?: string
+          ticket_code?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_sponsors: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          logo_url: string | null
+          name: string
+          tier: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          tier?: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          tier?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_sponsors_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          is_ticketed: boolean
+          location: string | null
+          max_attendees: number | null
+          start_date: string
+          status: string
+          ticket_price: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_ticketed?: boolean
+          location?: string | null
+          max_attendees?: number | null
+          start_date: string
+          status?: string
+          ticket_price?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_ticketed?: boolean
+          location?: string | null
+          max_attendees?: number | null
+          start_date?: string
+          status?: string
+          ticket_price?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      facilities: {
+        Row: {
+          amenities: string[] | null
+          capacity: number | null
+          created_at: string
+          description: string | null
+          hourly_rate: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          location: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          amenities?: string[] | null
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          hourly_rate?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          amenities?: string[] | null
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          hourly_rate?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      facility_bookings: {
+        Row: {
+          created_at: string
+          end_time: string
+          facility_id: string
+          id: string
+          notes: string | null
+          start_time: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          facility_id: string
+          id?: string
+          notes?: string | null
+          start_time: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          facility_id?: string
+          id?: string
+          notes?: string | null
+          start_time?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facility_bookings_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fundraising_campaigns: {
         Row: {
           category: string
@@ -169,35 +430,246 @@ export type Database = {
         }
         Relationships: []
       }
+      poll_options: {
+        Row: {
+          created_at: string
+          id: string
+          option_text: string
+          poll_id: string
+          vote_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_text: string
+          poll_id: string
+          vote_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_text?: string
+          poll_id?: string
+          vote_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_options_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_id?: string
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_anonymous: boolean
+          poll_type: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_anonymous?: boolean
+          poll_type?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_anonymous?: boolean
+          poll_type?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
+          interests: string[] | null
+          is_public: boolean
+          location: string | null
+          occupation: string | null
           phone: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
+          interests?: string[] | null
+          is_public?: boolean
+          location?: string | null
+          occupation?: string | null
           phone?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
+          interests?: string[] | null
+          is_public?: boolean
+          location?: string | null
+          occupation?: string | null
           phone?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      volunteer_opportunities: {
+        Row: {
+          created_at: string
+          date: string | null
+          description: string | null
+          duration: string | null
+          id: string
+          location: string | null
+          skills_needed: string[] | null
+          spots_available: number | null
+          spots_filled: number
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          duration?: string | null
+          id?: string
+          location?: string | null
+          skills_needed?: string[] | null
+          spots_available?: number | null
+          spots_filled?: number
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          duration?: string | null
+          id?: string
+          location?: string | null
+          skills_needed?: string[] | null
+          spots_available?: number | null
+          spots_filled?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      volunteer_signups: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          opportunity_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          opportunity_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          opportunity_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_signups_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
