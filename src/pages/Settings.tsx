@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { 
   User, Bell, Lock, Globe, Moon, HelpCircle, 
   FileText, Shield, ChevronRight, LogOut
@@ -7,6 +8,7 @@ import { Header } from "@/components/layout/Header";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const settingsSections = [
   {
@@ -45,6 +47,8 @@ const settingsSections = [
 
 export default function Settings() {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { signOut, user } = useAuth();
   const [toggles, setToggles] = useState({
     notifications: true,
     emailNotifications: false,
@@ -62,11 +66,21 @@ export default function Settings() {
     });
   };
 
-  const handleLogout = () => {
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out",
-    });
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out",
+      });
+      navigate("/auth");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -74,6 +88,25 @@ export default function Settings() {
       <Header title="Settings" showBack />
       
       <div className="px-4 max-w-md mx-auto">
+        {/* User Info */}
+        {user && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <div className="bg-card rounded-2xl p-4 shadow-soft flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full gradient-primary flex items-center justify-center">
+                <User className="w-7 h-7 text-primary-foreground" />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground">{user.email}</p>
+                <p className="text-sm text-muted-foreground">Signed in</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {settingsSections.map((section, sectionIndex) => (
           <motion.div
             key={section.title}
@@ -130,19 +163,38 @@ export default function Settings() {
         </motion.div>
 
         {/* Logout Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <button 
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 py-3 text-destructive font-medium hover:bg-destructive/10 rounded-xl transition-colors"
+        {user && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
           >
-            <LogOut className="w-5 h-5" />
-            <span>Log Out</span>
-          </button>
-        </motion.div>
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 py-3 text-destructive font-medium hover:bg-destructive/10 rounded-xl transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              <span>Log Out</span>
+            </button>
+          </motion.div>
+        )}
+
+        {/* Sign In Button for non-authenticated users */}
+        {!user && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <button 
+              onClick={() => navigate("/auth")}
+              className="w-full flex items-center justify-center gap-2 py-3 text-primary font-medium hover:bg-primary/10 rounded-xl transition-colors"
+            >
+              <User className="w-5 h-5" />
+              <span>Sign In</span>
+            </button>
+          </motion.div>
+        )}
       </div>
     </div>
   );
