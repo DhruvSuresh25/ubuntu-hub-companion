@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Check, Palette, Sparkles, RotateCcw, Mail, Phone, Globe, Linkedin, Twitter, Instagram, User, Building2, Briefcase } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Check, Palette, Sparkles, RotateCcw, Mail, Phone, Globe, Linkedin, Twitter, Instagram, User, Building2 } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import QRCode from "react-qr-code";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 type Template = "elegant" | "aurora" | "midnight" | "sunset" | "nature" | "royal";
 
@@ -37,62 +39,13 @@ const templates: {
   secondary: string;
   accent: string;
   pattern: string;
-  textColor: string;
 }[] = [
-  { 
-    id: "elegant", 
-    name: "Elegant", 
-    primary: "#1a1a2e", 
-    secondary: "#16213e",
-    accent: "#e94560",
-    pattern: "elegant",
-    textColor: "#ffffff"
-  },
-  { 
-    id: "aurora", 
-    name: "Aurora", 
-    primary: "#667eea", 
-    secondary: "#764ba2",
-    accent: "#f093fb",
-    pattern: "aurora",
-    textColor: "#ffffff"
-  },
-  { 
-    id: "midnight", 
-    name: "Midnight", 
-    primary: "#0f0c29", 
-    secondary: "#302b63",
-    accent: "#24243e",
-    pattern: "midnight",
-    textColor: "#ffffff"
-  },
-  { 
-    id: "sunset", 
-    name: "Sunset", 
-    primary: "#ff6b6b", 
-    secondary: "#feca57",
-    accent: "#ff9ff3",
-    pattern: "sunset",
-    textColor: "#ffffff"
-  },
-  { 
-    id: "nature", 
-    name: "Nature", 
-    primary: "#11998e", 
-    secondary: "#38ef7d",
-    accent: "#a8edea",
-    pattern: "nature",
-    textColor: "#ffffff"
-  },
-  { 
-    id: "royal", 
-    name: "Royal", 
-    primary: "#141E30", 
-    secondary: "#243B55",
-    accent: "#c9a227",
-    pattern: "royal",
-    textColor: "#ffffff"
-  },
+  { id: "elegant", name: "Elegant", primary: "#1a1a2e", secondary: "#16213e", accent: "#e94560", pattern: "elegant" },
+  { id: "aurora", name: "Aurora", primary: "#667eea", secondary: "#764ba2", accent: "#f093fb", pattern: "aurora" },
+  { id: "midnight", name: "Midnight", primary: "#0f0c29", secondary: "#302b63", accent: "#24243e", pattern: "midnight" },
+  { id: "sunset", name: "Sunset", primary: "#ff6b6b", secondary: "#feca57", accent: "#ff9ff3", pattern: "sunset" },
+  { id: "nature", name: "Nature", primary: "#11998e", secondary: "#38ef7d", accent: "#a8edea", pattern: "nature" },
+  { id: "royal", name: "Royal", primary: "#141E30", secondary: "#243B55", accent: "#c9a227", pattern: "royal" },
 ];
 
 const colorPresets = [
@@ -108,9 +61,13 @@ const colorPresets = [
 
 export default function BusinessCardCreate() {
   const navigate = useNavigate();
+  const { id } = useParams();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isFlipped, setIsFlipped] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(!!id);
   
   const [cardData, setCardData] = useState<CardData>({
     fullName: "",
@@ -128,6 +85,52 @@ export default function BusinessCardCreate() {
     secondaryColor: "#16213e",
     accentColor: "#e94560",
   });
+
+  // Fetch existing card if editing
+  useEffect(() => {
+    if (id && user) {
+      fetchCard();
+    }
+  }, [id, user]);
+
+  const fetchCard = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('business_cards')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data) {
+        setCardData({
+          fullName: data.full_name,
+          profession: data.profession,
+          company: data.company,
+          email: data.email || "",
+          phone: data.phone || "",
+          website: data.website || "",
+          linkedin: data.linkedin || "",
+          twitter: data.twitter || "",
+          instagram: data.instagram || "",
+          bio: data.bio || "",
+          template: data.template as Template,
+          primaryColor: data.primary_color,
+          secondaryColor: data.secondary_color,
+          accentColor: data.accent_color,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load business card",
+        variant: "destructive",
+      });
+    } finally {
+      setIsFetching(false);
+    }
+  };
 
   const handleTemplateSelect = (template: typeof templates[0]) => {
     setCardData({
@@ -148,7 +151,7 @@ export default function BusinessCardCreate() {
     });
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!cardData.fullName || !cardData.profession || !cardData.company) {
       toast({
         title: "Missing Information",
@@ -157,28 +160,86 @@ export default function BusinessCardCreate() {
       });
       return;
     }
-    toast({
-      title: "Card Created!",
-      description: "Your business card has been generated successfully",
-    });
-    navigate("/business-cards");
+
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please sign in to create a business card",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const cardPayload = {
+        user_id: user.id,
+        full_name: cardData.fullName,
+        profession: cardData.profession,
+        company: cardData.company,
+        email: cardData.email || null,
+        phone: cardData.phone || null,
+        website: cardData.website || null,
+        linkedin: cardData.linkedin || null,
+        twitter: cardData.twitter || null,
+        instagram: cardData.instagram || null,
+        bio: cardData.bio || null,
+        template: cardData.template,
+        primary_color: cardData.primaryColor,
+        secondary_color: cardData.secondaryColor,
+        accent_color: cardData.accentColor,
+      };
+
+      if (id) {
+        // Update existing card
+        const { error } = await supabase
+          .from('business_cards')
+          .update(cardPayload)
+          .eq('id', id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Card Updated!",
+          description: "Your business card has been updated successfully",
+        });
+      } else {
+        // Create new card
+        const { error } = await supabase
+          .from('business_cards')
+          .insert(cardPayload);
+
+        if (error) throw error;
+
+        toast({
+          title: "Card Created!",
+          description: "Your business card has been saved successfully",
+        });
+      }
+
+      navigate("/business-cards");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save business card",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getCardBackground = () => {
     const template = templates.find(t => t.id === cardData.template);
     switch (template?.pattern) {
-      case "elegant":
-        return `linear-gradient(135deg, ${cardData.primaryColor} 0%, ${cardData.secondaryColor} 100%)`;
       case "aurora":
         return `linear-gradient(135deg, ${cardData.primaryColor} 0%, ${cardData.secondaryColor} 50%, ${cardData.accentColor} 100%)`;
       case "midnight":
         return `linear-gradient(to right, ${cardData.primaryColor}, ${cardData.secondaryColor}, ${cardData.accentColor})`;
       case "sunset":
         return `linear-gradient(to top right, ${cardData.primaryColor}, ${cardData.secondaryColor})`;
-      case "nature":
-        return `linear-gradient(to right, ${cardData.primaryColor}, ${cardData.secondaryColor})`;
-      case "royal":
-        return `linear-gradient(135deg, ${cardData.primaryColor} 0%, ${cardData.secondaryColor} 100%)`;
       default:
         return `linear-gradient(135deg, ${cardData.primaryColor} 0%, ${cardData.secondaryColor} 100%)`;
     }
@@ -189,7 +250,6 @@ export default function BusinessCardCreate() {
       className="absolute inset-0 rounded-2xl p-6 flex flex-col justify-between overflow-hidden backface-hidden"
       style={{ background: getCardBackground() }}
     >
-      {/* Decorative elements */}
       <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
         <svg viewBox="0 0 100 100" className="w-full h-full">
           <circle cx="80" cy="20" r="40" fill={cardData.accentColor} />
@@ -200,8 +260,6 @@ export default function BusinessCardCreate() {
           <circle cx="20" cy="80" r="30" fill={cardData.accentColor} />
         </svg>
       </div>
-      
-      {/* Accent line */}
       <div 
         className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl"
         style={{ backgroundColor: cardData.accentColor }}
@@ -268,7 +326,6 @@ export default function BusinessCardCreate() {
       className="absolute inset-0 rounded-2xl p-6 flex flex-col justify-between overflow-hidden backface-hidden rotate-y-180"
       style={{ background: getCardBackground() }}
     >
-      {/* Pattern overlay */}
       <div className="absolute inset-0 opacity-5">
         <div className="w-full h-full" style={{
           backgroundImage: `repeating-linear-gradient(45deg, ${cardData.accentColor} 0, ${cardData.accentColor} 1px, transparent 0, transparent 50%)`,
@@ -278,11 +335,9 @@ export default function BusinessCardCreate() {
       
       <div className="relative z-10 flex-1 flex flex-col justify-center items-center text-center">
         {cardData.bio ? (
-          <>
-            <p className="text-white/90 text-sm italic leading-relaxed max-w-[90%]">
-              "{cardData.bio}"
-            </p>
-          </>
+          <p className="text-white/90 text-sm italic leading-relaxed max-w-[90%]">
+            "{cardData.bio}"
+          </p>
         ) : (
           <p className="text-white/50 text-sm italic">Add a bio to personalize your card</p>
         )}
@@ -320,9 +375,17 @@ export default function BusinessCardCreate() {
     </div>
   );
 
+  if (isFetching) {
+    return (
+      <div className="app-container content-area flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
   return (
     <div className="app-container content-area bg-gradient-to-b from-background to-muted/30">
-      <Header title="Create Card" showBack />
+      <Header title={id ? "Edit Card" : "Create Card"} showBack />
       
       <div className="px-4 max-w-md mx-auto pb-32">
         {/* 3D Card Preview */}
@@ -388,7 +451,6 @@ export default function BusinessCardCreate() {
                   background: `linear-gradient(135deg, ${template.primary} 0%, ${template.secondary} 100%)`
                 }}
               >
-                {/* Accent dot */}
                 <div 
                   className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full"
                   style={{ backgroundColor: template.accent }}
@@ -611,10 +673,17 @@ export default function BusinessCardCreate() {
         >
           <Button 
             onClick={handleGenerate}
+            disabled={isLoading}
             className="w-full h-14 gradient-primary text-primary-foreground rounded-2xl shadow-glow text-base font-semibold gap-2"
           >
-            <Sparkles className="w-5 h-5" />
-            Generate Business Card
+            {isLoading ? (
+              <div className="animate-spin w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full" />
+            ) : (
+              <>
+                <Sparkles className="w-5 h-5" />
+                {id ? "Update Business Card" : "Generate Business Card"}
+              </>
+            )}
           </Button>
         </motion.div>
       </div>
