@@ -2,11 +2,13 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
   Building2, Calendar, Briefcase, Users, Megaphone, CreditCard,
-  Heart, ChevronRight, Star
+  Heart, ChevronRight
 } from "lucide-react";
-import { mockUser, mockEvents, mockOrganizations, mockAnnouncements } from "@/data/mockData";
+import { mockEvents, mockOrganizations, mockAnnouncements } from "@/data/mockData";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 
 const quickActions = [
   { icon: Building2, label: "Organizations", path: "/organizations", color: "bg-card-purple" },
@@ -29,6 +31,12 @@ const item = {
 };
 
 export default function Home() {
+  const { user } = useAuth();
+  const { profile } = useProfile();
+  
+  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Guest';
+  const initials = displayName.charAt(0).toUpperCase();
+
   return (
     <div className="app-container content-area">
       {/* Welcome Header */}
@@ -41,12 +49,12 @@ export default function Home() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <Avatar className="w-12 h-12 border-2 border-primary-foreground/30">
-                <AvatarImage src={mockUser.avatar} />
-                <AvatarFallback>{mockUser.name[0]}</AvatarFallback>
+                <AvatarImage src={profile?.avatar_url || undefined} />
+                <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground">{initials}</AvatarFallback>
               </Avatar>
               <div>
                 <p className="text-primary-foreground/80 text-sm">Welcome back,</p>
-                <h2 className="text-primary-foreground font-semibold text-lg">{mockUser.name}</h2>
+                <h2 className="text-primary-foreground font-semibold text-lg">{displayName}</h2>
               </div>
             </div>
             <Link to="/profile">
@@ -73,7 +81,7 @@ export default function Home() {
           className="bg-card rounded-2xl p-4 shadow-soft mb-6"
         >
           <div className="grid grid-cols-4 gap-3">
-            {quickActions.map((action, index) => (
+            {quickActions.map((action) => (
               <motion.div key={action.path} variants={item}>
                 <Link
                   to={action.path}

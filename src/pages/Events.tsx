@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { MapPin, Clock, Users, Search, Filter } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState, useMemo } from "react";
 import { mockEvents } from "@/data/mockData";
 import { Header } from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,18 @@ import { Button } from "@/components/ui/button";
 const categories = ["All", "Conference", "Workshop", "Volunteer", "Social", "Sports"];
 
 export default function Events() {
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredEvents = useMemo(() => {
+    return mockEvents.filter(event => {
+      const matchesCategory = selectedCategory === "All" || event.category === selectedCategory;
+      const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          event.location.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [selectedCategory, searchQuery]);
+
   return (
     <div className="app-container content-area">
       <Header title="Events" showNotification />
@@ -25,6 +38,8 @@ export default function Events() {
             <Input 
               placeholder="Search events..." 
               className="pl-10 bg-card border-border rounded-xl"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <Button variant="outline" size="icon" className="rounded-xl border-border">
@@ -39,11 +54,12 @@ export default function Events() {
           transition={{ delay: 0.1 }}
           className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide"
         >
-          {categories.map((cat, index) => (
+          {categories.map((cat) => (
             <button
               key={cat}
+              onClick={() => setSelectedCategory(cat)}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                index === 0 
+                selectedCategory === cat 
                   ? "gradient-primary text-primary-foreground" 
                   : "bg-card text-foreground border border-border hover:border-primary"
               }`}
@@ -60,55 +76,61 @@ export default function Events() {
           transition={{ delay: 0.2 }}
           className="space-y-4"
         >
-          {mockEvents.map((event, index) => (
-            <motion.div
-              key={event.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index }}
-            >
-              <Link
-                to={`/events/${event.id}`}
-                className="block bg-card rounded-2xl overflow-hidden shadow-soft card-hover"
+          {filteredEvents.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No events found</p>
+            </div>
+          ) : (
+            filteredEvents.map((event, index) => (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * index }}
               >
-                <div className="h-40 relative">
-                  <img 
-                    src={event.image} 
-                    alt={event.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
-                  <div className="absolute bottom-3 left-3 right-3">
-                    <span className="inline-block bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium mb-2">
-                      {event.category}
-                    </span>
-                    <h3 className="text-primary-foreground font-semibold text-lg leading-tight">
-                      {event.title}
-                    </h3>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="w-4 h-4" />
-                      <span>{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4" />
-                      <span className="line-clamp-1">{event.location}</span>
+                <Link
+                  to={`/events/${event.id}`}
+                  className="block bg-card rounded-2xl overflow-hidden shadow-soft card-hover"
+                >
+                  <div className="h-40 relative">
+                    <img 
+                      src={event.image} 
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <span className="inline-block bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium mb-2">
+                        {event.category}
+                      </span>
+                      <h3 className="text-primary-foreground font-semibold text-lg leading-tight">
+                        {event.title}
+                      </h3>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Users className="w-4 h-4" />
-                      <span>{event.attendeeCount} attending</span>
+                  <div className="p-4">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-4 h-4" />
+                        <span>{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-4 h-4" />
+                        <span className="line-clamp-1">{event.location}</span>
+                      </div>
                     </div>
-                    <span className="text-xs text-muted-foreground">by {event.organizerName}</span>
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <Users className="w-4 h-4" />
+                        <span>{event.attendeeCount} attending</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">by {event.organizerName}</span>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
+                </Link>
+              </motion.div>
+            ))
+          )}
         </motion.div>
       </div>
     </div>
