@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { Users, MapPin, Search, Filter, Plus, Check } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Users, MapPin, Search, Filter, Plus, Check, Building2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
 import { mockOrganizations } from "@/data/mockData";
 import { Header } from "@/components/layout/Header";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 const categories = ["All", "Technology", "Environment", "Education", "Arts", "Sports"];
 
 export default function Organizations() {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -44,6 +45,13 @@ export default function Organizations() {
           </div>
           <Button variant="outline" size="icon" className="rounded-xl border-border">
             <Filter className="w-4 h-4" />
+          </Button>
+          <Button 
+            size="icon" 
+            className="rounded-xl gradient-primary"
+            onClick={() => navigate("/organizations/create")}
+          >
+            <Plus className="w-4 h-4" />
           </Button>
         </motion.div>
 

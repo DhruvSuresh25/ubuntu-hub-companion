@@ -34,8 +34,10 @@ import MemberDirectory from "./pages/MemberDirectory";
 import FacilityBooking from "./pages/FacilityBooking";
 import CreateEvent from "./pages/CreateEvent";
 import Groups from "./pages/Groups";
+import CreateGroup from "./pages/CreateGroup";
 import Documents from "./pages/Documents";
 import Memberships from "./pages/Memberships";
+import CreateOrganization from "./pages/CreateOrganization";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,7 @@ function AppLayout() {
         <Route path="/events/create" element={<CreateEvent />} />
         <Route path="/events/:id" element={<EventDetails />} />
         <Route path="/organizations" element={<Organizations />} />
+        <Route path="/organizations/create" element={<CreateOrganization />} />
         <Route path="/organizations/:id" element={<OrganizationDetails />} />
         <Route path="/businesses" element={<Businesses />} />
         <Route path="/more" element={<More />} />
@@ -74,6 +77,7 @@ function AppLayout() {
         <Route path="/members" element={<MemberDirectory />} />
         <Route path="/facilities" element={<FacilityBooking />} />
         <Route path="/groups" element={<Groups />} />
+        <Route path="/groups/create" element={<CreateGroup />} />
         <Route path="/documents" element={<Documents />} />
         <Route path="/memberships" element={<Memberships />} />
         <Route path="/gallery" element={<More />} />
