@@ -33,6 +33,9 @@ import Polls from "./pages/Polls";
 import MemberDirectory from "./pages/MemberDirectory";
 import FacilityBooking from "./pages/FacilityBooking";
 import CreateEvent from "./pages/CreateEvent";
+import Groups from "./pages/Groups";
+import Documents from "./pages/Documents";
+import Memberships from "./pages/Memberships";
 
 const queryClient = new QueryClient();
 
@@ -70,8 +73,9 @@ function AppLayout() {
         <Route path="/polls" element={<Polls />} />
         <Route path="/members" element={<MemberDirectory />} />
         <Route path="/facilities" element={<FacilityBooking />} />
-        {/* Placeholder routes */}
-        <Route path="/documents" element={<More />} />
+        <Route path="/groups" element={<Groups />} />
+        <Route path="/documents" element={<Documents />} />
+        <Route path="/memberships" element={<Memberships />} />
         <Route path="/gallery" element={<More />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
