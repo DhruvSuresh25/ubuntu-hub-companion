@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 import { 
   CreditCard, Heart, FileText, Users, ImageIcon, 
   Megaphone, Vote, Settings, HelpCircle, LogOut,
-  ChevronRight, User
+  ChevronRight, User, Building2, Calendar, MapPin,
+  UserCircle, HandHeart
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
@@ -12,20 +13,30 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const menuSections = [
   {
+    title: "Community",
+    items: [
+      { icon: Building2, label: "Organizations", path: "/organizations" },
+      { icon: Users, label: "Groups & Committees", path: "/groups" },
+      { icon: UserCircle, label: "Member Directory", path: "/members" },
+      { icon: CreditCard, label: "Memberships", path: "/memberships" },
+    ]
+  },
+  {
     title: "Services",
     items: [
-      { icon: CreditCard, label: "Business Cards", path: "/business-cards", badge: "2" },
+      { icon: Calendar, label: "Events", path: "/events" },
+      { icon: MapPin, label: "Facility Booking", path: "/facilities" },
       { icon: Heart, label: "Fundraise", path: "/fundraise" },
-      { icon: Users, label: "Volunteers", path: "/volunteers" },
-      { icon: Megaphone, label: "Announcements", path: "/announcements" },
+      { icon: HandHeart, label: "Volunteers", path: "/volunteers" },
     ]
   },
   {
     title: "Content",
     items: [
+      { icon: Megaphone, label: "Announcements", path: "/announcements" },
+      { icon: Vote, label: "Polls & Surveys", path: "/polls" },
       { icon: FileText, label: "Documents", path: "/documents" },
-      { icon: ImageIcon, label: "Gallery", path: "/gallery" },
-      { icon: Vote, label: "Polls", path: "/polls" },
+      { icon: CreditCard, label: "Business Cards", path: "/business-cards", badge: "2" },
     ]
   },
   {
