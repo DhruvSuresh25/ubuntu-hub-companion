@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { BottomNav } from "@/components/layout/BottomNav";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 
@@ -41,51 +41,54 @@ import CreateOrganization from "./pages/CreateOrganization";
 
 const queryClient = new QueryClient();
 
-// Layout component to conditionally show BottomNav
-function AppLayout() {
+// Layout component to conditionally show navigation
+function AppRoutes() {
   const location = useLocation();
-  const hideNavRoutes = ["/onboarding", "/auth"];
-  const showNav = !hideNavRoutes.includes(location.pathname);
+  const hideLayoutRoutes = ["/onboarding", "/auth"];
+  const showLayout = !hideLayoutRoutes.includes(location.pathname);
 
-  return (
-    <>
-      <Routes>
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/events" element={<Events />} />
-        <Route path="/events/create" element={<CreateEvent />} />
-        <Route path="/events/:id" element={<EventDetails />} />
-        <Route path="/organizations" element={<Organizations />} />
-        <Route path="/organizations/create" element={<CreateOrganization />} />
-        <Route path="/organizations/:id" element={<OrganizationDetails />} />
-        <Route path="/businesses" element={<Businesses />} />
-        <Route path="/more" element={<More />} />
-        <Route path="/business-cards" element={<BusinessCards />} />
-        <Route path="/business-cards/create" element={<BusinessCardCreate />} />
-        <Route path="/business-cards/:id" element={<BusinessCardView />} />
-        <Route path="/business-cards/edit/:id" element={<BusinessCardCreate />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/volunteers" element={<Volunteers />} />
-        <Route path="/announcements" element={<Announcements />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/help" element={<Help />} />
-        <Route path="/fundraise" element={<Fundraise />} />
-        <Route path="/fundraise/create" element={<CreateCampaign />} />
-        <Route path="/fundraise/:id" element={<CampaignDetails />} />
-        <Route path="/polls" element={<Polls />} />
-        <Route path="/members" element={<MemberDirectory />} />
-        <Route path="/facilities" element={<FacilityBooking />} />
-        <Route path="/groups" element={<Groups />} />
-        <Route path="/groups/create" element={<CreateGroup />} />
-        <Route path="/documents" element={<Documents />} />
-        <Route path="/memberships" element={<Memberships />} />
-        <Route path="/gallery" element={<More />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      {showNav && <BottomNav />}
-    </>
+  const routes = (
+    <Routes>
+      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/events" element={<Events />} />
+      <Route path="/events/create" element={<CreateEvent />} />
+      <Route path="/events/:id" element={<EventDetails />} />
+      <Route path="/organizations" element={<Organizations />} />
+      <Route path="/organizations/create" element={<CreateOrganization />} />
+      <Route path="/organizations/:id" element={<OrganizationDetails />} />
+      <Route path="/businesses" element={<Businesses />} />
+      <Route path="/more" element={<More />} />
+      <Route path="/business-cards" element={<BusinessCards />} />
+      <Route path="/business-cards/create" element={<BusinessCardCreate />} />
+      <Route path="/business-cards/:id" element={<BusinessCardView />} />
+      <Route path="/business-cards/edit/:id" element={<BusinessCardCreate />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/volunteers" element={<Volunteers />} />
+      <Route path="/announcements" element={<Announcements />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="/help" element={<Help />} />
+      <Route path="/fundraise" element={<Fundraise />} />
+      <Route path="/fundraise/create" element={<CreateCampaign />} />
+      <Route path="/fundraise/:id" element={<CampaignDetails />} />
+      <Route path="/polls" element={<Polls />} />
+      <Route path="/members" element={<MemberDirectory />} />
+      <Route path="/facilities" element={<FacilityBooking />} />
+      <Route path="/groups" element={<Groups />} />
+      <Route path="/groups/create" element={<CreateGroup />} />
+      <Route path="/documents" element={<Documents />} />
+      <Route path="/memberships" element={<Memberships />} />
+      <Route path="/gallery" element={<More />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
+
+  if (!showLayout) {
+    return routes;
+  }
+
+  return <AppLayout>{routes}</AppLayout>;
 }
 
 const App = () => (
@@ -96,7 +99,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <AppLayout />
+            <AppRoutes />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

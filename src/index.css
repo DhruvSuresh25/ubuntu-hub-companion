@@ -182,14 +182,14 @@
   }
 }
 
-/* Mobile app container */
+/* App container - responsive */
 .app-container {
-  @apply max-w-md mx-auto min-h-screen bg-background relative;
+  @apply min-h-screen bg-background relative;
 }
 
-/* Bottom nav safe area */
+/* Bottom nav safe area - mobile only */
 .content-area {
-  @apply pb-20;
+  @apply pb-20 lg:pb-0;
 }
 
 /* Scrollbar styling */
