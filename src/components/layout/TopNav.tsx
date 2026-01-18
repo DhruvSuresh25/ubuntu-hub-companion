@@ -40,9 +40,9 @@ export function TopNav() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold">K</span>
+            <span className="text-primary-foreground font-bold">U</span>
           </div>
-          <span className="font-bold text-lg">Kootami</span>
+          <span className="font-bold text-lg">Ubuntu Hub</span>
         </Link>
 
         {/* Right Actions */}

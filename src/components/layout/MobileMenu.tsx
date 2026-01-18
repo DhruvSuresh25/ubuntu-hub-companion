@@ -33,9 +33,9 @@ export function MobileMenu() {
       <div className="p-6 border-b border-sidebar-border">
         <Link to="/" className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">K</span>
+            <span className="text-primary-foreground font-bold text-lg">U</span>
           </div>
-          <span className="font-bold text-xl text-sidebar-foreground">Kootami</span>
+          <span className="font-bold text-xl text-sidebar-foreground">Ubuntu Hub</span>
         </Link>
       </div>
 
