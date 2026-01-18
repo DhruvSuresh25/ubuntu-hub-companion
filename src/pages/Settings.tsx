@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { 
-  User, Bell, Lock, Globe, Moon, HelpCircle, 
+  User, Bell, Lock, Globe, HelpCircle, 
   FileText, Shield, ChevronRight, LogOut
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useTheme } from "@/hooks/useTheme";
+
 import {
   Dialog,
   DialogContent,
@@ -31,7 +31,7 @@ export default function Settings() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  
   const [toggles, setToggles] = useState({
     notifications: true,
     emailNotifications: false,
@@ -55,14 +55,6 @@ export default function Settings() {
   });
 
   const handleToggle = (key: string) => {
-    if (key === "darkMode") {
-      toggleTheme();
-      toast({
-        title: "Theme Updated",
-        description: `Dark mode has been ${theme === 'light' ? 'enabled' : 'disabled'}`,
-      });
-      return;
-    }
     
     setToggles(prev => ({
       ...prev,
@@ -178,7 +170,6 @@ export default function Settings() {
       items: [
         { icon: Bell, label: "Push Notifications", type: "toggle" as const, key: "notifications" },
         { icon: Bell, label: "Email Notifications", type: "toggle" as const, key: "emailNotifications" },
-        { icon: Moon, label: "Dark Mode", type: "toggle" as const, key: "darkMode" },
       ]
     },
     {
@@ -252,7 +243,7 @@ export default function Settings() {
                   
                   {item.type === "toggle" ? (
                     <Switch
-                      checked={item.key === "darkMode" ? theme === 'dark' : toggles[item.key as keyof typeof toggles]}
+                      checked={toggles[item.key as keyof typeof toggles]}
                       onCheckedChange={() => handleToggle(item.key!)}
                     />
                   ) : (
