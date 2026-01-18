@@ -65,9 +65,9 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        rcpos: {
-          magenta: "hsl(var(--rcpos-magenta))",
-          blue: "hsl(var(--rcpos-blue))",
+        reliance: {
+          magenta: "hsl(var(--reliance-magenta))",
+          purple: "hsl(var(--reliance-purple))",
         },
         link: "hsl(var(--link-blue))",
       },
