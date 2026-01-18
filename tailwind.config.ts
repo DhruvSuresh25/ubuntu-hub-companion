@@ -65,10 +65,11 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        ubuntu: {
-          purple: "hsl(var(--ubuntu-purple))",
-          blue: "hsl(var(--ubuntu-blue))",
+        rcpos: {
+          magenta: "hsl(var(--rcpos-magenta))",
+          blue: "hsl(var(--rcpos-blue))",
         },
+        link: "hsl(var(--link-blue))",
       },
       borderRadius: {
         lg: "var(--radius)",
