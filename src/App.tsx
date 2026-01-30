@@ -38,17 +38,19 @@ import CreateGroup from "./pages/CreateGroup";
 import Documents from "./pages/Documents";
 import Memberships from "./pages/Memberships";
 import CreateOrganization from "./pages/CreateOrganization";
+import Documentation from "./pages/Documentation";
 
 const queryClient = new QueryClient();
 
 // Layout component to conditionally show navigation
 function AppRoutes() {
   const location = useLocation();
-  const hideLayoutRoutes = ["/onboarding", "/auth"];
+  const hideLayoutRoutes = ["/onboarding", "/auth", "/documentation"];
   const showLayout = !hideLayoutRoutes.includes(location.pathname);
 
   const routes = (
     <Routes>
+      <Route path="/documentation" element={<Documentation />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/" element={<Home />} />
